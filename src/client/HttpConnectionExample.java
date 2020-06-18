@@ -63,12 +63,12 @@ public class HttpConnectionExample {
                 http.sendGet("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file"+urlParameters);
             }
             else if(ch==5) {
-            	//String filePath = "C:\\Users\\Owner\\Desktop\\stringText.txt";
-            	//String encryptedFilePath = "C:\\Users\\Owner\\Desktop\\encryptedText.txt";
-            	//String decryptedFilePath = "C:\\Users\\Owner\\Desktop\\decryptedText.txt";
             	String filePath = "";
             	String encryptedFilePath = "";
             	String decryptedFilePath = "";
+            	//filePath = "./stringText.txt";
+            	//encryptedFilePath = "./encryptedText.txt";
+            	//decryptedFilePath = "./decryptedText.txt";
             	
             	System.out.println("암호화 하고자 하는 파일의 위치를 입력해주세요 : ");
             	filePath = sc.nextLine();

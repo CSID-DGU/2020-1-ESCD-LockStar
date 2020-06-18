@@ -92,7 +92,6 @@ public class RSA {
 	 * @return String 반환
 	 */
 	public static String fileToString(String filePath) throws IOException {
-		//filePath = "C:\\Users\\Owner\\Desktop\\stringText.txt";
 		String content = "";
 
         try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
@@ -122,7 +121,6 @@ public class RSA {
 	 * @return 파일을 저장한 경로 반환
 	 */
 	public static String stringToFile(String str, String filePath) {
-		//filePath = "C:\\Users\\Owner\\Desktop\\stringText2.txt";
 
 		try {
             Files.write(Paths.get(filePath), str.getBytes());
