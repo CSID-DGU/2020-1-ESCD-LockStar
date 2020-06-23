@@ -15,6 +15,7 @@ import java.util.Scanner;
 public class HttpConnectionExample { 
 	static Scanner sc = new Scanner(System.in);
 	private final String USER_AGENT = "Mozilla/5.0";
+	
     public static void main(String[] args) throws Exception {
         HttpConnectionExample http = new HttpConnectionExample(); 
         int ch = 1;
@@ -41,15 +42,18 @@ public class HttpConnectionExample {
                 name = sc.nextLine();
                 System.out.print("password입력: ");
                 password = sc.nextLine();
-            	File key = makeKey();
+            	//File key = makeKey();
+                KeyPair key = RSA.keyMake();	//키 쌍 생성
                 urlParameters = "name="+name+"&password="+password+"&key="+key;
                 System.out.println(urlParameters);
                 http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/key",urlParameters);
             }
             else if(ch==3){
-            	File file = new File("./upload.txt");; 
+            	File file = new File("./upload.txt");
             	File file_key = upload();
-                urlParameters = "file="+file+"&file_key="+file_key;
+            	String keyPath = "./uploadkey.txt";
+            	//File encryptedFile = new File(RSA.encryption(filePath, savePath, publicKey));
+            	urlParameters = "file="+file+"&file_key="+file_key;
                 http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file",urlParameters);
             }
             else if(ch==4){
@@ -57,25 +61,22 @@ public class HttpConnectionExample {
             	String FileID = sc.nextLine();
             	System.out.print("ID입력: ");
             	String name = sc.nextLine();
-            	 System.out.print("password입력: ");
+            	System.out.print("password입력: ");
                 String password = sc.nextLine();
                 urlParameters = "/{"+FileID+"}?name="+name+"&password="+password;
                 http.sendGet("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file"+urlParameters);
             }
             else if(ch==5) {
-            	String filePath = "";
-            	String encryptedFilePath = "";
-            	String decryptedFilePath = "";
             	//filePath = "./stringText.txt";
             	//encryptedFilePath = "./encryptedText.txt";
             	//decryptedFilePath = "./decryptedText.txt";
             	
             	System.out.println("암호화 하고자 하는 파일의 위치를 입력해주세요 : ");
-            	filePath = sc.nextLine();
+            	String filePath = sc.nextLine();
             	System.out.println("암호화된 파일을 저장할 위치를 입력해주세요 : ");
-            	encryptedFilePath = sc.nextLine();
+            	String encryptedFilePath = sc.nextLine();
             	System.out.println("복호화된 파일을 저장할 위치를 입력해주세요 : ");
-            	decryptedFilePath = sc.nextLine();
+            	String decryptedFilePath = sc.nextLine();
             	
                 KeyPair keyPair = RSA.keyMake();
                 RSA.encryption(filePath, encryptedFilePath, keyPair.getPublic());
@@ -99,7 +100,7 @@ public class HttpConnectionExample {
         	BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream())); 
         	String inputLine; 
         	StringBuffer response = new StringBuffer(); 
-        	while ((inputLine = in.readLine()) != null) { 
+        	while ((inputLine = in.readLine()) != null) {
         		response.append(inputLine); } in.close();
         		System.out.println("HTTP 응답 코드 : " + responseCode); 
         		System.out.println("HTTP body : " + response.toString()
