@@ -2,7 +2,6 @@ package client;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +15,6 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +29,7 @@ public class RSA {
 	 * @return RSA 키쌍
 	 * @throws IOException 
 	 */
-	public static KeyPair keyMake() throws NoSuchAlgorithmException, IOException {
+	public static KeyPair keyMake(String public_key, String private_key) throws NoSuchAlgorithmException, IOException {
 		// RSA 키쌍을 생성합니다.
 		KeyPair keyPair = CipherUtil.genRSAKeyPair();
 		PrivateKey privateKey = keyPair.getPrivate();
@@ -40,14 +38,14 @@ public class RSA {
 		// Store Public Key.
 		X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(
 				publicKey.getEncoded());
-		FileOutputStream fos = new FileOutputStream("./public.key");
+		FileOutputStream fos = new FileOutputStream(public_key);
 		fos.write(x509EncodedKeySpec.getEncoded());
 		fos.close();
  
 		// Store Private Key.
 		PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
 				privateKey.getEncoded());
-		fos = new FileOutputStream("./private.key");
+		fos = new FileOutputStream(private_key);
 		fos.write(pkcs8EncodedKeySpec.getEncoded());
 		fos.close();
 		
@@ -55,37 +53,50 @@ public class RSA {
 	}
 	
 	/**
-	 * 로컬에 저장된 키를 load합니다.
-	 * @param algorithm 입력
+	 * 로컬에 저장된 public 키를 load합니다.
+	 * @param 키 경로 입력
 	 * @return
 	 */
-	public KeyPair LoadKeyPair(String algorithm)
+	public static PublicKey LoadPublicKeyPair(String keyPath)
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		// Read Public Key.
-		File filePublicKey = new File("./public.key");
-		FileInputStream fis = new FileInputStream("./public.key");
+		File filePublicKey = new File(keyPath);
+		FileInputStream fis = new FileInputStream(keyPath);
 		byte[] encodedPublicKey = new byte[(int) filePublicKey.length()];
 		fis.read(encodedPublicKey);
 		fis.close();
  
+		// Generate KeyPair.
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
+				encodedPublicKey);
+		PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+ 
+		return publicKey;
+	}
+	
+	/**
+	 * 로컬에 저장된 private 키를 load합니다.
+	 * @param 키 경로 입력
+	 * @return
+	 */
+	public static PrivateKey LoadPrivateKeyPair(String keyPath)
+			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		// Read Private Key.
-		File filePrivateKey = new File("./private.key");
-		fis = new FileInputStream("./private.key");
+		File filePrivateKey = new File(keyPath);
+		FileInputStream fis = new FileInputStream(keyPath);
 		byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
 		fis.read(encodedPrivateKey);
 		fis.close();
  
 		// Generate KeyPair.
-		KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
-				encodedPublicKey);
-		PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
  
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(
 				encodedPrivateKey);
 		PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
  
-		return new KeyPair(publicKey, privateKey);
+		return privateKey;
 	}
 
 	/**

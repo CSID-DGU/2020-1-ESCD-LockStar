@@ -103,7 +103,7 @@ public class Http {
      * @return 요청결과
      * @throws Exception
      */
-    public String submit() throws Exception{
+    public void submit() throws Exception{
         CloseableHttpClient http = HttpClients.createDefault();
         StringBuffer result = new StringBuffer();
          
@@ -112,8 +112,9 @@ public class Http {
             post.setEntity(params.build());
              
             CloseableHttpResponse response = http.execute(post);
-             
+            
             try{
+               int code = response.getStatusLine().getStatusCode();
                 HttpEntity res = response.getEntity();
                 BufferedReader br = new BufferedReader(
                                     new InputStreamReader(res.getContent(), Charset.forName("UTF-8")));
@@ -122,14 +123,14 @@ public class Http {
                 while( (buffer=br.readLine())!=null ){
                     result.append(buffer).append("\r\n");
                 }
+                System.out.println("HTTP 응답 코드 : " + code);
+             System.out.println("HTTP body : " + result);
             }finally{
                 response.close();
             }
         }finally{
             http.close();
         }
- 
-        return result.toString();
     }
 }
 
