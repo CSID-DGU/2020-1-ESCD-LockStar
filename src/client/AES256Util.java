@@ -69,8 +69,18 @@ public class AES256Util {
      * @throws GeneralSecurityException
      * @throws UnsupportedEncodingException
      */
-    public String decrypt(String str) throws NoSuchAlgorithmException, GeneralSecurityException, UnsupportedEncodingException {
-        Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+    public String decrypt(String str, String key) throws NoSuchAlgorithmException, GeneralSecurityException, UnsupportedEncodingException {
+        this.iv = key.substring(0, 16);
+        byte[] keyBytes = new byte[16];
+        byte[] b = key.getBytes("UTF-8");
+        int len = b.length;
+        if(len > keyBytes.length){
+            len = keyBytes.length;
+        }
+        System.arraycopy(b, 0, keyBytes, 0, len);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+        this.keySpec = keySpec;
+       Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
         c.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(iv.getBytes()));
         byte[] byteStr = Base64.decode(str);
         return new String(c.doFinal(byteStr), "UTF-8");
