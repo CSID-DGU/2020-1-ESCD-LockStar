@@ -2,5 +2,22 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_251"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v8.5"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/commons-fileupload-1.4-bin/commons-fileupload-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/commons-fileupload-1.4-bin/commons-fileupload-1.4-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/commons-fileupload-1.4-bin/commons-fileupload-1.4-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/commons-fileupload-1.4-bin/commons-fileupload-1.4-tests.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/commons-fileupload-1.4-bin/commons-fileupload-1.4-test-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/fluent-hc-4.5.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/httpclient-4.5.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/httpclient-cache-4.5.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/httpclient-osgi-4.5.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/httpclient-win-4.5.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/httpcore-4.4.13.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/httpmime-4.5.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/jna-4.5.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Owner/eclipse-workspace/httpcomponents-client-4.5.12/lib/jna-platform-4.5.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

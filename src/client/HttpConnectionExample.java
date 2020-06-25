@@ -1,16 +1,23 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
+
 
 public class HttpConnectionExample { 
 	static Scanner sc = new Scanner(System.in);
@@ -27,44 +34,79 @@ public class HttpConnectionExample {
             if(ch==0){
                 break;
             }
-            else if(ch==1){
+            else if(ch==1){		// 회원 가입
             	String name, password;
             	System.out.print("ID입력: ");
                 name = sc.nextLine();
                 System.out.print("password입력: ");
                 password = sc.nextLine();
-                urlParameters = "name="+name+"&password="+password;
-                http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/add",urlParameters);
+                
+                // 생성할 아이디와 패스워드 서버에 전송
+                Http http_post = new Http("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/add");
+				http_post.addParam("username", name)
+						 .addParam("password", password)
+						 .submit();
+                //urlParameters = "username="+name+"&password="+password;
+                //http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/add",urlParameters);
             }
-            else if(ch==2){
+            else if(ch==2){		// 공개키 등록
             	String name, password;
             	System.out.print("ID입력: ");
                 name = sc.nextLine();
                 System.out.print("password입력: ");
                 password = sc.nextLine();
-            	//File key = makeKey();
-                KeyPair key = RSA.keyMake();	//키 쌍 생성
-                urlParameters = "name="+name+"&password="+password+"&key="+key;
-                System.out.println(urlParameters);
-                http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/key",urlParameters);
+                
+                KeyPair key = RSA.keyMake();	// 키 쌍 생성
+				File filePublicKey = new File("./public.key");
+
+				// 사용자 공개키 서버에 등록
+				Http http_post = new Http("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/key");
+				http_post.addParam("username", name)
+						 .addParam("password", password)
+						 .addParam("key", filePublicKey)
+						 .submit();
+				
+			}
+            else if(ch==3){		// 파일 업로드
+            	String name, password, toName;
+            	System.out.print("ID입력: ");
+                name = sc.nextLine();
+                System.out.print("password입력: ");
+                password = sc.nextLine();
+                System.out.print("권한을 보낼 ID 입력: ");
+                toName = sc.nextLine();
+                
+                String filePath = "./upload.txt";
+                String encryptedFilePath = "./encryptedUpload.txt";
+            	File file = new File(filePath);			// 파일 생성
+            	upload(filePath, encryptedFilePath);	// 파일 암호화 및 파일에 대한 대칭키 생성
+            	String keyPath = "./aeskey.txt";		// 파일대 대한 대칭키 위치
+            	
+            	urlParameters = "username=" + name + "&password=" + password;
+            	http.sendGet("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/user/server_public_key"+urlParameters);
+            	
+            	// 대칭키 암호화 : 현재 publicKey를 서버에서 서버 공개키를 받아서 넣어야 함 : 미구현@@@@@@@@@@@@@@@@@
+            	//File encryptedFileKey = new File(RSA.encryption("./uploadkey.txt", "./encryptedUploadKey", publicKey));
+            	
+            	// 암호화된 파일을 서버에 전송
+            	//urlParameters = "file="+file+"&file_key="+encryptedFileKey;
+                //http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file",urlParameters);
+                
+                // 암호화된 파일에 대해 권한을 가질 사용자 ID 정보를 서버에 전송
+                urlParameters = "username=" + name + "&password=" + password + "&usernames=" + toName;
+                http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file/allow",urlParameters);
             }
-            else if(ch==3){
-            	File file = new File("./upload.txt");
-            	File file_key = upload();
-            	String keyPath = "./uploadkey.txt";
-            	//File encryptedFile = new File(RSA.encryption(filePath, savePath, publicKey));
-            	urlParameters = "file="+file+"&file_key="+file_key;
-                http.sendPost("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file",urlParameters);
-            }
-            else if(ch==4){
+            else if(ch==4){		// 파일 다운로드
             	System.out.print("다운로드할 파일명 입력: ");
             	String FileID = sc.nextLine();
             	System.out.print("ID입력: ");
             	String name = sc.nextLine();
             	System.out.print("password입력: ");
                 String password = sc.nextLine();
+                
                 urlParameters = "/{"+FileID+"}?name="+name+"&password="+password;
                 http.sendGet("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file"+urlParameters);
+                //http.sendGet("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file/key" + urlKeyParameters);
             }
             else if(ch==5) {
             	//filePath = "./stringText.txt";
@@ -146,17 +188,38 @@ public class HttpConnectionExample {
 		}
 		return key;
     }
-	
-	private static File upload() throws IOException {
-		String upload_key = "qweqwe";	// 파일 업로드 시 키 생성
-		File key = new File("./uploadkey.txt");
-		FileWriter writer = null;
+
+	private static void upload(String filePath, String encryptedFilePath) throws IOException, NoSuchAlgorithmException, GeneralSecurityException {
+		AES256Util aes = new AES256Util();
 		try {
-			writer = new FileWriter(key, false);
-			writer.write(upload_key);
-			writer.flush();
-		} catch(IOException e) {	
+			File infile = new File(filePath);
+			FileReader filereader = new FileReader(infile);
+			File outfile = new File(encryptedFilePath);
+			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
+			BufferedReader bufReader = new BufferedReader(filereader);
+			String line = "";
+			String crypto;
+			while ((line = bufReader.readLine()) != null) {
+				crypto = aes.encrypt(line);
+				if (outfile.isFile() && outfile.canWrite()) {
+					bufferedWriter.write(crypto);
+					bufferedWriter.newLine();
+					bufferedWriter.close();
+				}
+			}
+
+			// 파일에 대한 대칭키 로컬에 저장
+			String aeskey = aes.getKey(); // 암복호 시 사용되는 key
+			File keyfile = new File("./aeskey.txt");
+			bufferedWriter = new BufferedWriter(new FileWriter(keyfile));
+			bufferedWriter.write(aeskey);
+			bufferedWriter.newLine();
+			bufferedWriter.close();
+
+			bufReader.close();
+		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
+			System.out.println(e);
 		}
-		return key;
-    }
+	}
 }
