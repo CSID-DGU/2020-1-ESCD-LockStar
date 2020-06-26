@@ -112,8 +112,8 @@ public class RSA {
 
 		// Base64 인코딩된 암호화 문자열 입니다.
 		String encrypted = CipherUtil.encryptRSA(plainText, publicKey);
-		System.out.println("encrypted : ↓↓↓");
-		System.out.println(encrypted + "\n");
+//		System.out.println("encrypted : ↓↓↓");
+//		System.out.println(encrypted + "\n");
 
 		// 공개키를 Base64 인코딩한 문자일을 만듭니다.
 //		byte[] bytePublicKey = publicKey.getEncoded();
@@ -140,8 +140,8 @@ public class RSA {
 		
 		// 복호화 합니다.
 		String decrypted = CipherUtil.decryptRSA(encrypted, privateKey);
-		System.out.println("decrypted : ↓↓↓");
-		System.out.println(decrypted + "\n");
+//		System.out.println("decrypted : ↓↓↓");
+//		System.out.println(decrypted + "\n");
 
 		// 개인키를 Base64 인코딩한 문자열을 만듭니다.
 //		byte[] bytePrivateKey = privateKey.getEncoded();
@@ -161,15 +161,14 @@ public class RSA {
 	public static String fileToString(String filePath) throws IOException {
 		String content = "";
 
-        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+		try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
 
             // Formatting like \r\n will be lost
             // String content = lines.collect(Collectors.joining());
 
             // UNIX \n, WIndows \r\n
             content = lines.collect(Collectors.joining(System.lineSeparator()));
-            System.out.println("Contents : ↓↓↓");
-            System.out.println(content + "\n");
+            // System.out.println(content);
 
 			// File to List
             //List<String> list = lines.collect(Collectors.toList());
