@@ -148,6 +148,7 @@ public class HttpConnectionExample {
 
 				String keyPath = "./aeskey.txt";
 				
+				// 파일키 다운로드
 				urlParameters = "?username=" + name + "&password=" + password;
 				Conn.symkey("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file/key/" + fileId + "/"
 						+ urlParameters, keyPath);
@@ -163,10 +164,10 @@ public class HttpConnectionExample {
 				sb.insert(fileRename.lastIndexOf("."), "_encrypted");
 				String encryptedFilePath = sb.toString();
 				
-				// 주어진 대칭키로 암호화 실행해야함 : 미구현@@@@@@@@@@@@@@@
-				// upload(fileRename, encryptedFilePath, keyPath); // 파일 암호화 및 파일에 대한 대칭키 생성
+				// 주어진 대칭키로 암호화 실행
+				upload(fileRename, encryptedFilePath, keyPath, keyPath); // 파일 암호화 및 파일에 대한 대칭키 생성
 				
-				
+				// 암호화된 파일 전송
 				File newFile = new File(encryptedFilePath);
 				Http http_post = new Http("http://ec2-18-218-11-184.us-east-2.compute.amazonaws.com/file/" + fileId);
 
@@ -225,65 +226,100 @@ public class HttpConnectionExample {
 	}
 
 	private static void upload(String filePath, String encryptedFilePath, String keyPath)
-			throws IOException, NoSuchAlgorithmException, GeneralSecurityException {
-		AES256Util aes = new AES256Util();
-		try {
-			File infile = new File(filePath);
-			FileReader filereader = new FileReader(infile);
-			File outfile = new File(encryptedFilePath);
-			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
-			BufferedReader bufReader = new BufferedReader(filereader);
-			String line = "";
-			String crypto;
-			while ((line = bufReader.readLine()) != null) {
-				crypto = aes.encrypt(line);
-				if (outfile.isFile() && outfile.canWrite()) {
-					bufferedWriter.write(crypto);
-					bufferedWriter.newLine();
-					bufferedWriter.close();
-				}
-			}
+	         throws IOException, NoSuchAlgorithmException, GeneralSecurityException {
+	      AES256Util aes = new AES256Util();
+	      try {
+	         File infile = new File(filePath);
+	         FileReader filereader = new FileReader(infile);
+	         File outfile = new File(encryptedFilePath);
+	         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
+	         BufferedReader bufReader = new BufferedReader(filereader);
+	         String line = "";
+	         String crypto;
+	         while ((line = bufReader.readLine()) != null) {
+	            crypto = aes.encrypt(line);
+	            if (outfile.isFile() && outfile.canWrite()) {
+	               bufferedWriter.write(crypto);
+	               bufferedWriter.newLine();
+	            }
+	         }
+	         
+	         bufferedWriter.close();
+	         // 파일에 대한 대칭키 로컬에 저장
+	         String aeskey = aes.getKey(); // 암복호 시 사용되는 key
+	         File keyfile = new File(keyPath);
+	         keyfile.createNewFile();   // 대칭키 파일 생성
+	         bufferedWriter = new BufferedWriter(new FileWriter(keyfile));
+	         bufferedWriter.write(aeskey);
+	         bufferedWriter.newLine();
+	         bufferedWriter.close();
 
-			// 파일에 대한 대칭키 로컬에 저장
-			String aeskey = aes.getKey(); // 암복호 시 사용되는 key
-			File keyfile = new File(keyPath);
-			keyfile.createNewFile();	// 대칭키 파일 생성
-			bufferedWriter = new BufferedWriter(new FileWriter(keyfile));
-			bufferedWriter.write(aeskey);
-			bufferedWriter.newLine();
-			bufferedWriter.close();
+	         bufReader.close();
+	      } catch (FileNotFoundException e) {
+	      } catch (IOException e) {
+	         System.out.println(e);
+	      }
+	   }
 
-			bufReader.close();
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-	}
+	private static void upload(String filePath, String encryptedFilePath, String keyPath, String key)
+	         throws IOException, NoSuchAlgorithmException, GeneralSecurityException {
+	      AES256Util aes = new AES256Util();
+	      try {
+	         File infile = new File(filePath);
+	         FileReader filereader = new FileReader(infile);
+	         File outfile = new File(encryptedFilePath);
+	         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
+	         BufferedReader bufReader = new BufferedReader(filereader);
+	         String line = "";
+	         String crypto;
+	         while ((line = bufReader.readLine()) != null) {
+	            crypto = aes.encrypt(line, key);
+	            if (outfile.isFile() && outfile.canWrite()) {
+	               bufferedWriter.write(crypto);
+	               bufferedWriter.newLine();
+	            }
+	         }
+	         
+	         bufferedWriter.close();
+	         // 파일에 대한 대칭키 로컬에 저장
+	         String aeskey = aes.getKey(); // 암복호 시 사용되는 key
+	         File keyfile = new File(keyPath);
+	         keyfile.createNewFile();   // 대칭키 파일 생성
+	         bufferedWriter = new BufferedWriter(new FileWriter(keyfile));
+	         bufferedWriter.write(aeskey);
+	         bufferedWriter.newLine();
+	         bufferedWriter.close();
 
+	         bufReader.close();
+	      } catch (FileNotFoundException e) {
+	      } catch (IOException e) {
+	         System.out.println(e);
+	      }
+	   }
+	
 	private static void fileDecryption(String filePath, String savePath, String keyPath) 
-			throws UnsupportedEncodingException, NoSuchAlgorithmException, GeneralSecurityException {
-		AES256Util aes = new AES256Util();
-		try {
-			File infile = new File(filePath);
-			FileReader filereader = new FileReader(infile);
-			File outfile = new File(savePath);
-			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
-			BufferedReader bufReader = new BufferedReader(filereader);
-			String line = "";
-			String plain;
-			while ((line = bufReader.readLine()) != null) {
-				plain = aes.decrypt(line, RSA.fileToString(keyPath)); // 대칭key
-				if (outfile.isFile() && outfile.canWrite()) {
-					bufferedWriter.write(plain);
-					bufferedWriter.newLine();
-					bufferedWriter.close();
-				}
-			}
-
-			bufReader.close();
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-	}
+	         throws UnsupportedEncodingException, NoSuchAlgorithmException, GeneralSecurityException {
+	      AES256Util aes = new AES256Util();
+	      try {
+	         File infile = new File(filePath);
+	         FileReader filereader = new FileReader(infile);
+	         File outfile = new File(savePath);
+	         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
+	         BufferedReader bufReader = new BufferedReader(filereader);
+	         String line = "";
+	         String plain;
+	         while ((line = bufReader.readLine()) != null) {
+	            plain = aes.decrypt(line, RSA.fileToString(keyPath)); // 대칭key
+	            if (outfile.isFile() && outfile.canWrite()) {
+	               bufferedWriter.write(plain);
+	               bufferedWriter.newLine();
+	            }
+	         }
+	         bufferedWriter.close();
+	         bufReader.close();
+	      } catch (FileNotFoundException e) {
+	      } catch (IOException e) {
+	         System.out.println(e);
+	      }
+	   }
 }

@@ -61,6 +61,24 @@ public class AES256Util {
         return enStr;
     }
 
+    public String encrypt(String str, String key) throws NoSuchAlgorithmException, GeneralSecurityException, UnsupportedEncodingException{
+        this.iv = key.substring(0, 16);
+         byte[] keyBytes = new byte[16];
+         byte[] b = key.getBytes("UTF-8");
+         int len = b.length;
+         if(len > keyBytes.length){
+             len = keyBytes.length;
+         }
+         System.arraycopy(b, 0, keyBytes, 0, len);
+         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+         this.keySpec = keySpec;
+        Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+         c.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(iv.getBytes()));
+         byte[] encrypted = c.doFinal(str.getBytes("UTF-8"));
+         String enStr = new String(Base64.encode(encrypted));
+         return enStr;
+     }
+    
     /**
      * AES256으로 암호화된 txt 를 복호화한다.
      * @param str 복호화할 문자열
