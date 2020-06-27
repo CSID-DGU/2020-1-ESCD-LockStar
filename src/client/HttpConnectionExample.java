@@ -30,7 +30,7 @@ public class HttpConnectionExample {
 		while (true) {
 			System.out.print(
 					"\n ================= 메뉴선택  =================\n"
-					+ " 1: 회원가입 \t2: 로그인 \t3: 파일 업로드 \n"
+					+ " 1: 회원가입 \t2: 로그인 \t\t3: 파일 업로드 \n"
 					+ " 4: 파일 목록 \t5: 파일 다운로드 \t6: 권한 전송 \n"
 					+ " 7: 파일 수정 \t8: 파일 암호키 다운 \t9: 복호화 모듈 \n"
 					+ " 10: 로그아웃 \t0: 프로그램 종료 \n"
@@ -147,6 +147,7 @@ public class HttpConnectionExample {
 				fileRename = sc.nextLine();
 
 				String keyPath = "./aeskey.txt";
+				String decryptedKeyPath = "./aeskey_decrypted.txt";
 				
 				// 파일키 다운로드
 				urlParameters = "?username=" + name + "&password=" + password;
@@ -157,7 +158,7 @@ public class HttpConnectionExample {
 				// 사용자 비밀키 불러오기
 				PrivateKey user_privatekey = RSA.LoadPrivateKeyPair(privateKeyPath);
 				// 사용자 비밀키로 파일 대칭키 복호화
-				RSA.decryption(keyPath, keyPath, user_privatekey);
+				RSA.decryption(keyPath, decryptedKeyPath, user_privatekey);
 				
 				// 암호화된 파일 경로
 				sb = new StringBuffer(fileRename);
@@ -165,7 +166,7 @@ public class HttpConnectionExample {
 				String encryptedFilePath = sb.toString();
 				
 				// 주어진 대칭키로 암호화 실행
-				upload(fileRename, encryptedFilePath, keyPath, keyPath); // 파일 암호화 및 파일에 대한 대칭키 생성
+				upload(fileRename, encryptedFilePath, decryptedKeyPath, decryptedKeyPath); // 파일 암호화 및 파일에 대한 대칭키 생성
 				
 				// 암호화된 파일 전송
 				File newFile = new File(encryptedFilePath);
@@ -190,6 +191,7 @@ public class HttpConnectionExample {
 				String filePath = sc.nextLine();
 
 				String keyPath = "./aeskey.txt";
+				String decryptedKeyPath = "./aeskey_decrypted.txt";
 
 				String privateKeyPath = "./private_" + name + ".txt";
 				System.out.print("파일을 저장할 위치 입력: ");
@@ -199,9 +201,9 @@ public class HttpConnectionExample {
 				// 사용자 비밀키 불러오기
 				PrivateKey user_privatekey = RSA.LoadPrivateKeyPair(privateKeyPath);
 				// 사용자 비밀키로 파일 대칭키 복호화
-				RSA.decryption(keyPath, keyPath, user_privatekey);
+				RSA.decryption(keyPath, decryptedKeyPath, user_privatekey);
 				// 파일 대칭키로 파일 복호화
-				fileDecryption(filePath, savePath, keyPath);
+				fileDecryption(filePath, savePath, decryptedKeyPath);
 				
 
 			} else if (ch == 10) { // 로그아웃
